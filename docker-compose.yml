@@ -1,0 +1,145 @@
+version: '3'
+
+
+services:
+  flask:
+    build: flask_generated
+    entrypoint:
+      - gunicorn
+    command:
+      - --workers
+      - "8"
+      - --bind
+      - 0.0.0.0:8080
+      - swagger_server.wsgi:app
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker_local/flask_generated/swagger_server:/usr/src/app/swagger_server
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - kms
+
+  proxy:
+    image: jwilder/nginx-proxy
+    #    build: ./docker_local/reverse_proxy
+    networks:
+      - kms
+    environment:
+      - DEFAULT_HOST=chariot-km
+    ports:
+      - "81:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+  zoo1:
+    image: zookeeper:3.4.9
+    networks:
+      - kms
+    hostname: zoo1
+    ports:
+      - "2182:2182"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2182
+      ZOO_SERVERS: server.1=zoo1:2888:3888
+    volumes:
+      - ./zk-single-kafka-multiple/zoo1/data:/data
+      - ./zk-single-kafka-multiple/zoo1/datalog:/datalog
+
+  kafka:
+    image: confluentinc/cp-kafka:5.3.1
+    networks:
+      - kms
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka:19092,LISTENER_DOCKER_EXTERNAL://chariot-km.dai-lab.de:9092
+      #      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka:19092,LISTENER_DOCKER_EXTERNAL://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2182"
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+    volumes:
+      - ./zk-single-kafka-multiple/kafka/data:/var/lib/kafka/data
+    depends_on:
+      - zoo1
+
+  kafka2:
+    image: confluentinc/cp-kafka:5.3.1
+    networks:
+      - kms
+    hostname: kafka2
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka2:19093,LISTENER_DOCKER_EXTERNAL://chariot-km.dai-lab.de:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2182"
+      KAFKA_BROKER_ID: 2
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+    volumes:
+      - ./zk-single-kafka-multiple/kafka2/data:/var/lib/kafka/data
+    depends_on:
+      - zoo1
+
+  kafka3:
+    image: confluentinc/cp-kafka:5.3.1
+    networks:
+      - kms
+    hostname: kafka3
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka3:19094,LISTENER_DOCKER_EXTERNAL://chariot-km.dai-lab.de:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2182"
+      KAFKA_BROKER_ID: 3
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+    volumes:
+      - ./zk-single-kafka-multiple/kafka3/data:/var/lib/kafka/data
+    depends_on:
+      - zoo1
+
+  kafka_manager:
+
+    build: ./docker_global/kafka_manager
+    networks:
+      - kms
+    depends_on:
+      - kafka
+    image: localhost:5000/global.kafka.manager
+    volumes:
+      - ./docker_global/kafka_manager/kafka_manager:/kafka_manager
+
+  mongo:
+    image: mongo
+    networks:
+      - kms
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: kms
+      MONGO_INITDB_ROOT_PASSWORD: dPP88is,
+      MONGODB_DATABASE: kms_global,
+    volumes:
+      - ./db:/data/db
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redis/database:/bitnami/redis/data
+    networks:
+      - kms
+
+networks:
+  kms:
