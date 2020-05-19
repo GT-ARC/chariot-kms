@@ -132,3 +132,4 @@ dmypy.json
 
 /db/
 /docker_local/flask_generated/swagger_server/swagger/generated_files/
+/.idea/
