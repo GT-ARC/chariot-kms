@@ -126,7 +126,7 @@ def update_human_property(body, uuid, key):  # noqa: E501
 
 
 @kafka_add(endpoint='humans')
-def humanmodel_post(body):  # noqa: E501
+def model_create(body):  # noqa: E501
     """Adds a new HumanModel
 
      # noqa: E501

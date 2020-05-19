@@ -7,4 +7,4 @@ class EmbeddedValueDocument(EmbeddedDocument):
 
 
 class ValueDocumentList(Document):
-    values = EmbeddedDocumentListField(EmbeddedValueDocument, instance=EmbeddedDocument, name='values')
+    values = EmbeddedDocumentListField(EmbeddedValueDocument, instance=EmbeddedDocument)

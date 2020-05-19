@@ -3,7 +3,7 @@ version: '3'
 
 services:
   flask:
-    build: flask_generated
+    build: kms_api
     entrypoint:
       - gunicorn
     command:
@@ -16,23 +16,12 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./docker_local/flask_generated/swagger_server:/usr/src/app/swagger_server
+      - ./kms_api/swagger_server:/usr/src/app/swagger_server
     environment:
       - FLASK_ENV=development
     networks:
       - kms
 
-  proxy:
-    image: jwilder/nginx-proxy
-    #    build: ./docker_local/reverse_proxy
-    networks:
-      - kms
-    environment:
-      - DEFAULT_HOST=chariot-km
-    ports:
-      - "81:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   zoo1:
     image: zookeeper:3.4.9
@@ -107,17 +96,6 @@ services:
     depends_on:
       - zoo1
 
-  kafka_manager:
-
-    build: ./docker_global/kafka_manager
-    networks:
-      - kms
-    depends_on:
-      - kafka
-    image: localhost:5000/global.kafka.manager
-    volumes:
-      - ./docker_global/kafka_manager/kafka_manager:/kafka_manager
-
   mongo:
     image: mongo
     networks:
@@ -131,15 +109,6 @@ services:
       - ./db:/data/db
     ports:
       - "27017:27017"
-
-  redis:
-    image: bitnami/redis:latest
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    volumes:
-      - ./redis/database:/bitnami/redis/data
-    networks:
-      - kms
 
 networks:
   kms:

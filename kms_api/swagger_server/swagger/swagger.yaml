@@ -1049,7 +1049,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HumanModel'
-      x-openapi-router-controller: swagger_server.controllers.super_controller
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
   /humans/{uuid}/:
     parameters:
       - name: uuid
