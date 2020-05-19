@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  flask:
+    build: ./docker_local/flask_generated
+    # this is production setting:
+    entrypoint:
+      - gunicorn
+    command:
+      - --workers
+      - "8"
+      - --bind
+      - 0.0.0.0:8080
+      - swagger_server.wsgi:app
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker_local/flask_generated/swagger_server:/usr/src/app/swagger_server
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - kms
+
+  proxy:
+    image: jwilder/nginx-proxy
+    #    build: ./docker_local/reverse_proxy
+    networks:
+      - kms
+    environment:
+      - DEFAULT_HOST=chariot-km
+    ports:
+      - "81:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  whoami:
+    image: jwilder/whoami
+    environment:
+      - VIRTUAL_HOST=whoami.local
+    networks:
+      - kms
+
+
+
+networks:
+  kms:

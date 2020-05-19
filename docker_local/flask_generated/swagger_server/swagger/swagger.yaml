@@ -1,0 +1,2346 @@
+openapi: 3.0.2
+info:
+  title: kms
+  description: woop
+  version: 1.0.2
+servers:
+  - url: http://localhost:8080/v1
+paths:
+  /devices/:
+    get:
+      tags:
+        - DeviceModel
+      summary: Lists all registered devices (objectType is actuator, sensor)
+      operationId: get_all_devices
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    post:
+      tags:
+        - DeviceModel
+      summary: Adds a new DeviceModel
+      operationId: devices_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceModel'
+          links:
+            GetDeviceByID:
+              operationId: get_device
+              parameters:
+                deviceID: $response.body#/id
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /devices/{device_uuid}/:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Gets a device by its UUID
+      operationId: get_device
+      responses:
+        '200':
+          description: A Device Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    put:
+      tags:
+        - DeviceModel
+      summary: Updates the device model, use this to add values
+      operationId: update_device
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceModel'
+        required: true
+      responses:
+        "201":
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    delete:
+      tags:
+        - DeviceModel
+      summary: Deletes the device model identified by device_uuid
+      operationId: delete_device
+      responses:
+        '200':
+          description: OK
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /devices/{device_uuid}/{attribute_name}/:
+    parameters:
+      - name: device_uuid
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: attribute_name
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Get the attribute identified by attribute_name of this device
+      operationId: get_device_attribute
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    patch:
+      tags:
+        - DeviceModel
+      summary: Set the attribute identified by attribute_name of this device
+      operationId: set_device_attribute
+      requestBody:
+        $ref: '#/components/requestBodies/SetAttributeBody'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAttributeBody'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /devices/{device_uuid}/location/{attribute_name}/:
+    parameters:
+      - name: device_uuid
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: attribute_name
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Get location of device
+      operationId: get_device_location_attribute
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    patch:
+      tags:
+        - DeviceModel
+      summary: Set the attribute identified by attribute_name of this device location
+      operationId: set_device_location_attribute
+      requestBody:
+        $ref: '#/components/requestBodies/SetAttributeBody'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAttributeBody'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+
+  /devices/{device_uuid}/history/:
+    parameters:
+      - in: path
+        name: device_uuid
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: length
+        schema:
+          type: integer
+        required: false
+        description: optional value to limit the number of values returned (per property)
+      - in: query
+        name: clear
+        schema:
+          type: boolean
+        required: false
+        description: true if historical data should be cleared. add length for number of values that should be retained.
+    get:
+      tags:
+        - DeviceModel
+      summary: All recorded values for this device
+      operationId: get_device_history
+      responses:
+        '200':
+          description: A device model with value lists instead of values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+
+
+
+  /devices/{device_uuid}/properties/{key}/:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Gets a property identified by {key} of a device identified by {id}
+      operationId: get_device_property
+      responses:
+        '201':
+          description: A property (if {key} is given) or a list of properties of the device identified by {device_uuid}
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: '#/components/schemas/DeviceModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    put:
+      tags:
+        - DeviceModel
+      summary: Updates the property model identified by key of the device identified by device_uuid
+      operationId: update_device_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePropertyModel'
+        required: true
+      responses:
+        '201':
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+
+  /devices/{device_uuid}/properties/{key}/{attribute_name}/:
+    parameters:
+      - in: path
+        name: device_uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: attribute_name
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Get attribute_name of property of device
+      operationId: get_device_property_attribute
+
+      responses:
+        '200':
+          description: Value of specified attribute_name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevicePropertyModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    patch:
+      tags:
+        - DeviceModel
+      summary: Get attribute_name of property of device
+      operationId: set_device_property_attribute
+      requestBody:
+        $ref: '#/components/requestBodies/SetAttributeBody'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAttributeBody'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /devices/{device_uuid}/properties/{key}/history/:
+    parameters:
+      - in: path
+        name: device_uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: length
+        schema:
+          type: integer
+        required: false
+        description: optional value to limit the number of values returned (per property)
+      - in: query
+        name: clear
+        schema:
+          type: boolean
+        required: false
+        description: true if historical data should be cleared. add length for number of values that should be retained.
+    get:
+      tags:
+        - DeviceModel
+      summary: All recorded values for this device
+      operationId: get_device_property_history
+
+      responses:
+        '200':
+          description: A device model with value lists instead of values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+
+  /devices/{device_uuid}/properties/{key}/bulk_update/:
+    parameters:
+      - in: path
+        name: device_uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+    put:
+      tags:
+        - DeviceModel
+      summary: Bulk update of property values
+      operationId: device_property_bulk_update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                - $ref: '#/components/schemas/BulkUpdateItem'
+            example:
+              x: 1000
+              y: 12
+        required: true
+      responses:
+        '200':
+          description: A device model with value lists instead of values
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+
+
+  /devices/{device_uuid}/properties/{key1}/properties/{key2}/:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key1
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key2
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DeviceModel
+      summary: Gets a property identified by {key} of a device identified by {id}
+      operationId: get_device_nested_property
+      responses:
+        '200':
+          description: Nested property retrieval. Detail if key2 is given, list if not. device id is required
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: '#/components/schemas/DevicePropertyModel'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+    put:
+      tags:
+        - DeviceModel
+      summary: Updates the nested property identified by key2 of property model identified by key1 of the device identified by device_uuid
+      operationId: update_nested_device_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevicePropertyModel'
+        required: true
+      responses:
+        '201':
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /devices/{device_uuid}/properties/{key1}/properties/{key2}/bulk_update/:
+    parameters:
+      - name: device_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key1
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key2
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags:
+        - DeviceModel
+      summary: Bulk update of nested property
+      operationId: device_nested_property_bulk_update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                - $ref: '#/components/schemas/BulkUpdateItem'
+            example:
+              x: 1000
+              y: 12
+        required: true
+      responses:
+        '201':
+          description: 'OK'
+      x-openapi-router-controller: swagger_server.controllers.device_model_controller
+  /services/:
+    get:
+      tags:
+        - ServiceModel
+      summary: Lists all registered services
+      operationId: get_all_services
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    post:
+      tags:
+        - ServiceModel
+      summary: Adds a new ServiceModel
+      operationId: services_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+  /services/{service_uuid}/:
+    parameters:
+      - name: service_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ServiceModel
+      summary: Gets a service by its UUID
+      operationId: get_service
+      responses:
+        '200':
+          description: A Service Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    put:
+      tags:
+        - ServiceModel
+      summary: Updates the service model, use this to add values
+      operationId: update_service
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceModel'
+        required: true
+      responses:
+        "201":
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    delete:
+      tags:
+        - ServiceModel
+      summary: Deletes the service model identified by service_uuid
+      operationId: delete_service
+      responses:
+        '200':
+          description: OK
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+  /services/{service_uuid}/history/:
+    parameters:
+      - in: path
+        name: service_uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ServiceModel
+      summary: List of the service's properties' histories
+      operationId: get_service_history
+      responses:
+        '200':
+          description: Service property history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+  /services/{service_uuid}/properties/:
+
+    parameters:
+      - in: path
+        name: service_uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ServiceModel
+      summary: List of the service's properties
+      operationId: get_service_properties
+      responses:
+        '200':
+          description: A list of service properties
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePropertyModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    put:
+      tags:
+        - ServiceModel
+      summary: Add property to service model
+      operationId: service_property_add
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicePropertyModel'
+        required: true
+      responses:
+        '200':
+          description: The updated service model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+  /services/{service_uuid}/properties/{key}/history/:
+    parameters:
+      - in: path
+        name: service_uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ServiceModel
+      summary: List of the service's properties history
+      operationId: get_service_property_history
+      responses:
+        '200':
+          description: Service property history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+  /services/{service_uuid}/properties/{key}/:
+
+    parameters:
+      - in: path
+        name: service_uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ServiceModel
+      summary: Returns a single Service Property
+      operationId: get_service_property
+      responses:
+        '200':
+          description: A service property
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePropertyModel'
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    put:
+      tags:
+        - ServiceModel
+      summary: Updates the property model identified by key of the service identified by service_uuid
+      operationId: update_service_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicePropertyModel'
+        required: true
+      responses:
+        '201':
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+    delete:
+      deprecated: true
+      tags:
+        - ServiceModel
+      summary: Delete a service property
+      operationId: delete_service_property
+      responses:
+        '200':
+          description: the new service model
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceModel'
+
+      x-openapi-router-controller: swagger_server.controllers.service_model_controller
+
+
+
+
+
+  /skills/:
+    get:
+      tags:
+        - SkillModel
+      summary: Lists all registered skills
+      operationId: get_all_skills
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillModel'
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+    post:
+      tags:
+        - SkillModel
+      summary: Adds a new SkillModel
+      operationId: skills_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillModel'
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+  /skills/{skill_uuid}/:
+
+    parameters:
+      - name: skill_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - SkillModel
+      summary: Gets a skill by its uuid
+      operationId: get_skill
+      responses:
+        '200':
+          description: A Skill Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillModel'
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+    put:
+      tags:
+        - SkillModel
+      summary: Updates the skill model, use this to add values
+      operationId: update_skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillModel'
+        required: true
+      responses:
+        "201":
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+    delete:
+      tags:
+        - SkillModel
+      summary: Deletes the skill model identified by skill_uuid
+      operationId: delete_skill
+      responses:
+        '200':
+          description: OK
+
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+  /skills/{skill_uuid}/properties/:
+    parameters:
+      - name: skill_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - SkillModel
+      summary: Get all properties of skill
+      operationId: get_skill_property_list
+      responses:
+        '200':
+          description: A Skill Property Object List
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillModel'
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+  /skills/{skill_uuid}/properties/{key}/:
+    parameters:
+      - name: skill_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      tags:
+        - SkillModel
+      summary: Get single property of skill
+      operationId: get_skill_property_detail
+      responses:
+        '200':
+          description: A Skill Property Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillModel'
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+    put:
+      tags:
+        - SkillModel
+      summary: Updates the skill property model, use this to add values to single property
+      operationId: update_skill_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillPropertyModel'
+        required: true
+      responses:
+        "201":
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.skill_model_controller
+  /monitoringservice/:
+    get:
+      tags:
+        - MonitoringService
+      summary: Lists all items
+      operationId: get_all_monitoringservice
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+    post:
+      tags:
+        - MonitoringService
+      summary: Adds a new MonitoringService
+      operationId: monitoring_service_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringServiceModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+  /monitoringservice/{msid}/:
+    parameters:
+      - name: msid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - MonitoringService
+      summary: Get specific MS
+      operationId: get_monitoringservice
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+    delete:
+      tags:
+        - MonitoringService
+      summary: Delete a monitoring service
+      operationId: delete_monitoring_service
+      responses:
+        "201":
+          description: Deleted
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+
+  /monitoringservice/{msid}/loadbalancer/{lbid}/:
+    parameters:
+      - name: msid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: lbid
+        in: path
+        schema:
+          type: string
+    get:
+      tags:
+        - MonitoringService
+      summary: Returns the loadbalancer object
+      operationId: get_loadbalancer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadBalancerModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+
+
+    put:
+      tags:
+        - MonitoringService
+      summary: Update the loadbalancer
+      operationId: update_loadbalancer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoadBalancerModel'
+      responses:
+        "201":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+  /monitoringservice/{msid}/agentlist/:
+    parameters:
+      - name: msid
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      tags:
+        - MonitoringService
+      summary: Add to the agentlist
+      operationId: agentlist_add
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentMapping'
+      responses:
+        "201":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+
+
+  /monitoringservice/{msid}/agentlist/{agentlistid}/:
+    parameters:
+      - name: msid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: agentlistid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - MonitoringService
+      summary: returns the agentlist object of the monitoring service object
+      operationId: get_ms_agentlist
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentList'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+
+
+
+
+
+
+  /monitoringservice/{msid}/agentlist/{agentlistid}/mappings/{mapping_id}/:
+    parameters:
+      - name: msid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: agentlistid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: mapping_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - MonitoringService
+      summary: Get a mapping object
+      operationId: get_ms_mapping
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMapping'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+    delete:
+      tags:
+        - MonitoringService
+      summary: Delete an agent mapping from an agentlist
+      operationId: agentlist_delete_agent
+      responses:
+        "201":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringServiceModel'
+      x-openapi-router-controller: swagger_server.controllers.monitoring_service_model_controller
+  /humans/:
+    get:
+      tags:
+        - HumanModel
+      summary: Lists all registered humanmodels
+      operationId: get_all_humanmodels
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanModel'
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+    post:
+      tags:
+        - HumanModel
+      summary: Adds a new HumanModel
+      operationId: model_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HumanModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanModel'
+      x-openapi-router-controller: swagger_server.controllers.super_controller
+  /humans/{uuid}/:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+    get:
+      tags:
+        - HumanModel
+      summary: Returns specific humanmodel
+      operationId: get_humanmodel
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanModel'
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+    put:
+      tags:
+        - HumanModel
+      summary: Updates the human model, use this to add values
+      operationId: update_human_model
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HumanModel'
+        required: true
+      responses:
+        "200":
+          description: OK
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+    delete:
+      tags:
+        - HumanModel
+      summary: Deletes the HumanModel identified by uuid.
+      operationId: delete_human_model
+      responses:
+        "200":
+          description: OK
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+  /humans/{uuid}/properties/{key}/:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - HumanModel
+      summary: Gets a property identified by {key} of a humanmodel identified by uuid
+      operationId: get_human_property
+      responses:
+        '200':
+          description: A property of the human identified by {uuid}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HumanPropertyModel'
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+    put:
+      tags:
+        - HumanModel
+      summary: Updates the property model identified by key of the humanmodel identified by uuid
+      operationId: update_human_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HumanPropertyModel'
+        required: true
+      responses:
+        '201':
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+  /humans/{uuid}/operations/:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - HumanModel
+      summary: Returns all operations
+      operationId: get_human_operations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationModel'
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+
+  /humans/{uuid}/operations/{name}/:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - HumanModel
+      summary: Returns an operation of humanmodel identified by uuid and name (of operation)
+      operationId: get_human_operation
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationModel'
+      x-openapi-router-controller: swagger_server.controllers.human_model_controller
+
+  /products/:
+    get:
+      tags:
+        - ProductModel
+      summary: Return a list of all products
+      operationId: get_all_products
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+    post:
+      tags:
+        - ProductModel
+      summary: Return a list of all products
+      operationId: product_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductModel'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+  /products/{uuid}/:
+
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: Returns a product model identified by uuid
+      operationId: get_product_model
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    put:
+      tags:
+        - ProductModel
+      operationId: update_product_model
+      summary: Update product model and also addes values to production flow properties
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductModel'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+
+    delete:
+      tags:
+        - ProductModel
+      summary: Delete product model with uuid
+      operationId: delete_product
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+  /products/{uuid}/history/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: All recorded values
+      operationId: get_product_history
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductModel'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+  /products/{uuid}/productInfo/{name}/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get single product info item
+      operationId: get_product_info_item
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionInfoItem'
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+
+  /products/{uuid}/productInfo/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get all product info items
+      operationId: get_product_info
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+
+  /products/{uuid}/productionFlow/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get production flow
+      operationId: get_production_flow
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+  /products/{uuid}/productionFlow/{name}/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get production flow item
+      operationId: get_production_flow_item
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionFlowItem'
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    put:
+      tags:
+        - ProductModel
+      summary: Update production flow item, adds values to properties
+      operationId: update_production_flow_item
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionFlowItem'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionFlowItem'
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+
+  /products/{uuid}/productionFlow/{name}/properties/{key}/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get production flow item property
+      operationId: get_production_flow_item_property
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionFlowItemProperty'
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+    put:
+      tags:
+        - ProductModel
+      summary: Update production flow item property, adds values to property
+      operationId: update_production_flow_item_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductionFlowItemProperty'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionFlowItemProperty'
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+  /products/{uuid}/productionFlow/{name}/properties/{key}/history/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+
+      - in: path
+        name: key
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - ProductModel
+      summary: get production flow item property history
+      operationId: get_production_flow_item_property_history
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductionFlowItemProperty'
+
+      x-openapi-router-controller: swagger_server.controllers.products_controller
+  /tasks/:
+    get:
+      tags:
+        - TaskModel
+      summary: get a list of all tasks
+      operationId: get_all_tasks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskModel'
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+    post:
+      tags:
+        - TaskModel
+      summary: Create task
+      operationId: task_add
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+
+  /tasks/{uuid}/:
+    parameters:
+      - in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - TaskModel
+      summary: Task Detail View
+      operationId: get_task_detail
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+
+    put:
+      tags:
+        - TaskModel
+      description: Update task model
+      operationId: update_task_model
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskModel'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+    delete:
+      tags:
+        - TaskModel
+      description: Delete task
+      operationId: delete_task
+      responses:
+        '200':
+          description: OK
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+  /tasks/{task_uuid}/properties/:
+    parameters:
+      - name: task_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - TaskModel
+      summary: Get all properties of task
+      operationId: get_task_property_list
+      responses:
+        '200':
+          description: A Task Property Object List
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+  /tasks/{task_uuid}/properties/{key}/:
+    parameters:
+      - name: task_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      tags:
+        - TaskModel
+      summary: Get single property of task
+      operationId: get_task_property_detail
+      responses:
+        '200':
+          description: A Task Property Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskModel'
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+    put:
+      tags:
+        - TaskModel
+      summary: Updates the task property model, use this to add values to single property
+      operationId: update_task_property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPropertyModel'
+        required: true
+      responses:
+        "201":
+          description: created
+      x-openapi-router-controller: swagger_server.controllers.task_model_controller
+
+
+components:
+  requestBodies:
+    SetAttributeBody:
+      description: A single value to set. Allowed are only string, number, boolean, and json objects. Lists are not supported.
+      required: true
+      content:
+        text/plain:
+          schema:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+        application/json:
+          schema:
+            type: object
+  responses:
+    GetAttributeBody:
+      description: A single value.
+      content:
+        application/json:
+          schema:
+            type: object
+        text/plain:
+          schema:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+
+  schemas:
+    BaseModel:
+      required:
+        - name
+        - objectType
+        - uuid
+      type: object
+      properties:
+        objectType:
+          type: string
+          example: sensor
+          enum:
+            - actuator
+            - sensor
+            - human
+            - service
+            - skill
+            - task
+            - action
+            - healthdata
+            - humanrole
+            - message
+            - permission
+            - preference
+            - property
+        name:
+          type: string
+          description: '[]'
+        uuid:
+          type: string
+          description: '[]'
+        kafka_topic:
+          type: string
+          description: '[]'
+          readOnly: true
+        _id:
+          type: string
+          description: '[]'
+          readOnly: true
+      description: '[]'
+    SecurityMixin:
+      required:
+        - ip
+        - securitykey
+      type: object
+      properties:
+        identifier:
+          type: string
+        securitykey:
+          type: string
+        ip:
+          type: string
+    PositionValue:
+      required:
+        - lat
+        - lng
+      type: object
+      properties:
+        lat:
+          type: number
+        lng:
+          type: number
+    IndoorPositionValue:
+      required:
+        - indoorlat
+        - indoorlng
+      type: object
+      properties:
+        indoorlat:
+          type: number
+        indoorlng:
+          type: number
+    LocationProperty:
+      type: object
+      required:
+        - identifier
+        - indoorposition
+        - level
+        - name
+        - position
+        - type
+      properties:
+        identifier:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+        level:
+          type: integer
+        position:
+          $ref: '#/components/schemas/PositionValue'
+        indoorposition:
+          $ref: '#/components/schemas/IndoorPositionValue'
+    RuntimeEnvironmentMixin:
+      required:
+        - location
+      type: object
+      properties:
+        reId:
+          type: string
+        location:
+          $ref: '#/components/schemas/LocationProperty'
+
+    GroupMixin:
+      required:
+        - groupId
+      type: object
+      properties:
+        groupId:
+          type: string
+      description: '[]'
+    BasePropertyModel:
+      required:
+        - key
+      type: object
+      properties:
+        key:
+          type: string
+        writable:
+          type: boolean
+        kafka_topic:
+          type: string
+        url:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+        timestamp:
+          type: integer
+          format: int64
+    BooleanPropertyModel:
+      allOf:
+        - $ref: '#/components/schemas/BasePropertyModel'
+      required:
+        - type
+        - value
+      type: object
+      properties:
+        value:
+          type: boolean
+        type:
+          pattern: ^boolean$
+          type: string
+    StringPropertyModel:
+      allOf:
+        - $ref: '#/components/schemas/BasePropertyModel'
+      required:
+        - type
+        - value
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          pattern: ^string$
+          type: string
+    NumberPropertyModel:
+      allOf:
+        - $ref: '#/components/schemas/BasePropertyModel'
+      required:
+        - type
+        - value
+      type: object
+      properties:
+        value:
+          type: number
+        type:
+          pattern: ^number$
+          type: string
+        min:
+          type: number
+        max:
+          type: number
+
+    ArrayPropertyModel:
+      allOf:
+        - $ref: '#/components/schemas/BasePropertyModel'
+      required:
+        - type
+        - value
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevicePropertyModel'
+        type:
+          pattern: ^array$
+          type: string
+    StringListPropertyModel:
+      allOf:
+        - $ref: '#/components/schemas/BasePropertyModel'
+      required:
+        - type
+        - value
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            type: string
+        type:
+          pattern: ^array$
+          type: string
+
+
+    DevicePropertyModel:
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+
+      properties:
+        unit:
+          type: string
+        writable:
+          type: boolean
+
+
+    DeviceModel:
+      required:
+        - properties
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevicePropertyModel'
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationModel'
+      description: '[]'
+      example:
+        properties:
+          - ""
+          - ""
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - $ref: '#/components/schemas/SecurityMixin'
+        - $ref: '#/components/schemas/RuntimeEnvironmentMixin'
+        - $ref: '#/components/schemas/GroupMixin'
+    OperationModel:
+      required:
+        - name
+        - inputs
+        - outputs
+      type: object
+      properties:
+        name:
+          type: string
+        inputs:
+          type: array
+          items:
+            type: string
+        outputs:
+          type: array
+          items:
+            type: string
+
+    ServicePropertyModel:
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+      properties:
+        relatedTo:
+          type: array
+          items:
+            type: string
+        operation:
+          type: string
+
+
+    ServiceModel:
+      required:
+        - properties
+        - operations
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicePropertyModel'
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationModel'
+      description: '[]'
+      example:
+        properties:
+          - ""
+          - ""
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - $ref: '#/components/schemas/SecurityMixin'
+        - $ref: '#/components/schemas/GroupMixin'
+
+
+    SkillPropertyModel:
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+      required:
+        - writable
+      properties:
+        writable:
+          type: boolean
+    SkillModel:
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkillPropertyModel'
+      example:
+        properties:
+          - ""
+          - ""
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+
+
+
+    MonitoringServiceModel:
+      type: object
+      required:
+        - loadbalancer
+        - agentlist
+      properties:
+        _id:
+          readOnly: true
+          type: string
+        loadbalancer:
+          $ref: '#/components/schemas/LoadBalancerModel'
+        agentlist:
+          $ref: '#/components/schemas/AgentList'
+    LoadBalancerModel:
+      type: object
+      properties:
+        _id:
+          readOnly: true
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+
+    AgentList:
+      type: object
+      required:
+        - mappings
+      properties:
+        _id:
+          readOnly: true
+          type: string
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentMapping'
+
+    AgentMapping:
+      type: object
+      required:
+        - agent_id
+        - device_id
+      properties:
+        _id:
+          readOnly: true
+          type: string
+        agent_id:
+          type: string
+        device_id:
+          type: string
+
+    BulkUpdateItem:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: integer
+          format: int64
+          example: 1395835871385
+        y:
+          anyOf:
+            - type: string
+            - type: number
+            - type: boolean
+          example: 451
+
+
+
+
+
+    HumanPropertyModel:
+
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+
+      properties:
+        unit:
+          type: string
+        writable:
+          type: boolean
+
+
+
+    HumanModel:
+      required:
+        - properties
+        - operations
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/HumanPropertyModel'
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationModel'
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - $ref: '#/components/schemas/SecurityMixin'
+        - $ref: '#/components/schemas/RuntimeEnvironmentMixin'
+    ProductionFlowItemProperty:
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+
+      properties:
+        unit:
+          type: string
+        size:
+          type: number
+        icon:
+          type: string
+        errorThreshold:
+          type: number
+        display:
+          type: boolean
+
+
+
+
+
+    ProductionFlowItem:
+      required:
+        - name
+        - icon
+        - progress
+        - paused
+        - total
+        - running
+        - properties
+      properties:
+        name:
+          type: string
+        icon:
+          type: string
+        progress:
+          type: number
+        paused:
+          type: boolean
+        total:
+          type: number
+        running:
+          type: number
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductionFlowItemProperty'
+        kafka_topic:
+          type: string
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+
+    BaseProductInfoItem:
+      required:
+        - name
+      properties:
+        kafka_topic:
+          type: string
+        url:
+          type: string
+        name:
+          type: string
+
+    ProductionInfoStringItem:
+      required:
+        - value
+      properties:
+        value:
+          type: string
+      allOf:
+        - $ref: '#/components/schemas/BaseProductInfoItem'
+
+    ProductionInfoNumberItem:
+      required:
+        - value
+      properties:
+        value:
+          type: number
+      allOf:
+        - $ref: '#/components/schemas/BaseProductInfoItem'
+
+    ProductionInfoBooleanItem:
+      required:
+        - value
+      properties:
+        value:
+          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/BaseProductInfoItem'
+
+    ProductionInfoItem:
+
+      oneOf:
+        - $ref: '#/components/schemas/ProductionInfoStringItem'
+        - $ref: '#/components/schemas/ProductionInfoNumberItem'
+        - $ref: '#/components/schemas/ProductionInfoBooleanItem'
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    BaseConstraintModel:
+      required:
+        - name
+        - operation
+      properties:
+        name:
+          type: string
+        operation:
+          type: string
+
+    NumberConstraintModel:
+      required:
+        - value
+      properties:
+        value:
+          type: number
+      allOf:
+        - $ref: '#/components/schemas/BaseConstraintModel'
+    BooleanConstraintModel:
+      required:
+        - value
+      properties:
+        value:
+          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/BaseConstraintModel'
+    StringConstraintModel:
+      required:
+        - value
+      properties:
+        value:
+          type: string
+      allOf:
+        - $ref: '#/components/schemas/BaseConstraintModel'
+
+    ConstraintModel:
+      oneOf:
+        - $ref: '#/components/schemas/StringConstraintModel'
+        - $ref: '#/components/schemas/NumberConstraintModel'
+        - $ref: '#/components/schemas/BooleanConstraintModel'
+
+    ProductModel:
+      required:
+        - uuid
+        - category
+        - storedContainer
+        - identifier
+        - productAddInfo
+        - productName
+        - weight
+        - energyUsed
+        - deliveryDate
+        - statusInformation
+        - status
+        - state
+        - image
+        - productionFlow
+        - productInfo
+        - constraints
+      properties:
+        uuid:
+          type: string
+        category:
+          type: string
+        storedContainer:
+          type: string
+        identifier:
+          type: string
+        productAddInfo:
+          type: string
+        productName:
+          type: string
+        weight:
+          type: number
+        energyUsed:
+          type: number
+        deliveryDate:
+          type: integer
+          format: int64
+        statusInformation:
+          type: string
+        status:
+          type: string
+        state:
+          type: boolean
+        image:
+          type: string
+        productionFlow:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductionFlowItem'
+        productInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductionInfoItem'
+        constraints:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConstraintModel'
+    TaskPropertyModel:
+      oneOf:
+        - $ref: '#/components/schemas/BooleanPropertyModel'
+        - $ref: '#/components/schemas/NumberPropertyModel'
+        - $ref: '#/components/schemas/StringPropertyModel'
+        - $ref: '#/components/schemas/ArrayPropertyModel'
+        - $ref: '#/components/schemas/StringListPropertyModel'
+      properties:
+        writable:
+          type: boolean
+
+    TaskModel:
+      required:
+        - properties
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskPropertyModel'
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
