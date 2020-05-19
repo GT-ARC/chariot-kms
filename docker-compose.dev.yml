@@ -1,7 +1,35 @@
 version: '3'
 
-
 services:
+  flask:
+    build: ./docker_local/flask_generated
+    # this is production setting:
+
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker_local/flask_generated/swagger_server:/usr/src/app/swagger_server
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - kms
+
+  proxy:
+    image: jwilder/nginx-proxy
+    #    build: ./docker_local/reverse_proxy
+    networks:
+      - kms
+    environment:
+      - DEFAULT_HOST=chariot-km
+    ports:
+      - "81:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+
+
+
   zoo1:
     image: zookeeper:3.4.9
     networks:
@@ -99,15 +127,6 @@ services:
       - ./db:/data/db
     ports:
       - "27017:27017"
-
-  redis:
-    image: bitnami/redis:latest
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    volumes:
-      - ./redis/database:/bitnami/redis/data
-    networks:
-      - kms
 
 networks:
   kms:

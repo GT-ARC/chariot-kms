@@ -131,5 +131,5 @@ dmypy.json
 .pyre/
 
 /db/
-/docker_local/flask_generated/swagger_server/swagger/generated_files/
+/flask_generated/swagger_server/swagger/generated_files/
 /.idea/
