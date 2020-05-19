@@ -136,7 +136,7 @@ def model_create(body):  # noqa: E501
 
     :rtype: HumanModel
     """
-    BaseController.add_model_with_properties(body, HumanModel, HumanPropertyModel, body, ModelSerializer)
+    return BaseController.add_model_with_properties(body, HumanModel, HumanPropertyModel, 'uuid', ModelSerializer)
     # if connexion.request.is_json:
     #     if 'uuid' not in body or BaseController.get_db_model(HumanModel, 'uuid', body['uuid']) is not None:
     #         return "UUID not present or human with uuid exists", 400
