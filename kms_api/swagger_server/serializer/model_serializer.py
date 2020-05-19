@@ -1,8 +1,7 @@
-from swagger_server.test.performance.timeit import timeit
-
 from swagger_server.models.base_model_kms import KMSModelMixin
 from swagger_server.serializer.base_model_serializer import BaseModelSerializer
 from swagger_server.serializer.property_model_serializer import PropertyModelSerializer
+from swagger_server.test.performance.timeit import timeit
 
 
 class ModelSerializer(BaseModelSerializer):

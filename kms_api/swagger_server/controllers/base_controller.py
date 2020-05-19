@@ -1,13 +1,12 @@
 import traceback
 from functools import wraps
 
-from swagger_server.test.performance.timeit import timeit
-
 from swagger_server.controllers.routing import RoutingInformation
 from swagger_server.kafka.kafka_producer import LocalKafkaProducer
 from swagger_server.models.base_model_ import Model
 from swagger_server.serializer.model_serializer import ModelSerializer
 from swagger_server.serializer.property_model_serializer import PropertyModelSerializer
+from swagger_server.test.performance.timeit import timeit
 
 
 def _publish_kafka(msg, topic):
