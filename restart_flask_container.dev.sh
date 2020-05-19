@@ -1,0 +1,1 @@
+sudo docker-compose -f docker-compose.global.yml -f docker-compose.local.dev.yml up -d --build --force-recreate flask

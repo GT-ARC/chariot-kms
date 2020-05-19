@@ -1,0 +1,25 @@
+# coding: utf-8
+
+# flake8: noqa
+from __future__ import absolute_import
+
+# import models into model package
+from swagger_server.models.array_property_model import ArrayPropertyModel
+from swagger_server.models.base_model import BaseModel
+from swagger_server.models.base_property_model import BasePropertyModel
+from swagger_server.models.boolean_property_model import BooleanPropertyModel
+from swagger_server.models.device_model import DeviceModel
+from swagger_server.models.device_property_model import DevicePropertyModel
+from swagger_server.models.group_mixin import GroupMixin
+from swagger_server.models.indoor_position_value import IndoorPositionValue
+from swagger_server.models.location_property import LocationProperty
+from swagger_server.models.number_property_model import NumberPropertyModel
+from swagger_server.models.operation_model import OperationModel
+from swagger_server.models.position_value import PositionValue
+from swagger_server.models.runtime_environment_mixin import RuntimeEnvironmentMixin
+from swagger_server.models.security_mixin import SecurityMixin
+from swagger_server.models.service_model import ServiceModel
+from swagger_server.models.service_property_model import ServicePropertyModel
+from swagger_server.models.skill_model import SkillModel
+from swagger_server.models.skill_property_model import SkillPropertyModel
+from swagger_server.models.string_property_model import StringPropertyModel
