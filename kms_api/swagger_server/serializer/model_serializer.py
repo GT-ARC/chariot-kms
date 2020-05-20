@@ -1,7 +1,6 @@
 from swagger_server.models.base_model_kms import KMSModelMixin
 from swagger_server.serializer.base_model_serializer import BaseModelSerializer
 from swagger_server.serializer.property_model_serializer import PropertyModelSerializer
-from swagger_server.test.performance.timeit import timeit
 
 
 class ModelSerializer(BaseModelSerializer):
@@ -9,7 +8,6 @@ class ModelSerializer(BaseModelSerializer):
     def __init__(self, *args, **kwargs):
         super(ModelSerializer, self).__init__(*args, **kwargs)
     
-    @timeit
     def deserialize(self, db_model, exclude=[]) -> dict:
         print("Desierlializing %s " % (type(db_model)))
         exclude.append('properties')
