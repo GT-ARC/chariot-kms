@@ -6,7 +6,6 @@ from swagger_server.kafka.kafka_producer import LocalKafkaProducer
 from swagger_server.models.base_model_ import Model
 from swagger_server.serializer.model_serializer import ModelSerializer
 from swagger_server.serializer.property_model_serializer import PropertyModelSerializer
-from swagger_server.test.performance.timeit import timeit
 
 
 def _publish_kafka(msg, topic):
@@ -251,7 +250,6 @@ class BaseController(object):
             return "%s" % e, 500
     
     @staticmethod
-    @timeit
     def get_detail_view(swagger_model_class, serializer, identifier_field, identifier_value):
         '''
         get a json object for a specific model
