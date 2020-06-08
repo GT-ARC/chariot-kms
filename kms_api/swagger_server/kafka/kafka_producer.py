@@ -32,9 +32,9 @@ class LocalKafkaProducer(object):
             while not self.stop_event.is_set():
                 try:
                     topic, msg = self.queue.get()
-                    # print("sending on topic %s: %s" % (topic, msg))
+                    # print("sending on topic %s: %s" % (topic, model))
                     result = producer.send(topic, msg)
-                    # print("result of sending on topic %s: %s: %s" % (result, topic, msg))
+                    # print("result of sending on topic %s: %s: %s" % (result, topic, model))
                 except:
                     print("Not sending %s" % msg)
                     traceback.print_exc()
