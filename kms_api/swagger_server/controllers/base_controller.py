@@ -1,3 +1,4 @@
+import logging
 import traceback
 from functools import wraps
 
@@ -8,21 +9,39 @@ from swagger_server.serializer.model_serializer import ModelSerializer
 from swagger_server.serializer.property_model_serializer import PropertyModelSerializer
 
 
-def _publish_kafka(msg, topic):
-    # print("Sending on %s" % (topic))
-    LocalKafkaProducer().add_to_queue(msg, topic)
+def _publish_kafka(model: dict, topic: str) -> None:
+    '''
+    @param model: Model to push to kafka
+    @param topic: Topic to push to
+    @return: None
+    @raise  ValueError when msg or topic are missing
+    '''
+    if model is not None and topic is not None:
+        LocalKafkaProducer().add_to_queue(model, topic)
+    else:
+        err = "Msg or topic not given model: %s // topic: %s" % (str(model), str(topic))
+        logging.ERROR(err)
+        raise ValueError(err)
 
 
 def publish_kafka(msg, topic=None):
+    '''
+    
+    @param msg: dict that should be sent. Can contain nested dicts with their own kafka topics (i.e. devices that have properties)
+    @param topic: if set, forces sending on this topic, otherwise looks for kafka_topic in the model
+    @return: None
+    '''
+    
     if topic is not None:
         _publish_kafka(msg, topic)
         return
-    if 'kafka_topic' in msg:
+    if 'kafka_topic' in msg and type(msg) is dict:
         _publish_kafka(msg, msg['kafka_topic'])
     
     # go into the model and check for nested models that should be send through kakfa. E.g. properties
     # do this only for objects (i.e. dicts):
     if type(msg) is not dict:
+        # recursion hook
         return
     for k, v in msg.items():
         if type(v) == dict:
@@ -93,9 +112,19 @@ class BaseController(object):
     
     def __init__(self):
         super(BaseController, self).__init__()
-    
+
     @staticmethod
     def add_model_with_properties(json, swagger_model_class, property_model_class, unique_field, serializer):
+        '''
+        
+        @param json: json to serialize
+        @param swagger_model_class: swagger class to use for serialization
+        @param property_model_class: the class of properties within the model
+        @param unique_field: the identifier field of the model (to check for duplicates)
+        @param serializer: the serializer class to use to serialize the model
+        
+        @return: detail view of the model
+        '''
         if unique_field not in json or BaseController.get_db_model(swagger_model_class, unique_field,
                                                                    json[unique_field]) is not None:
             return "UUID not present or device with uuid exists", 400
@@ -201,9 +230,15 @@ class BaseController(object):
                 if getattr(item, list_item_identifier_field) == list_item_identifier_value:
                     return item
         return None
-    
+
     @staticmethod
     def _delete_property_history(property, retain_values=None):
+        '''
+        Similar to delete_property_history, but working directly on the db model
+        @param property: db model of the property
+        @param retain_values: number of values that are to be retained (i.e. delete everything but the latest n values)
+        @return: None
+        '''
         list = property.value.value_list.fetch()
         if retain_values is None:
             list.values = []
@@ -211,19 +246,39 @@ class BaseController(object):
             list.values = list.values[((-1) * retain_values):]
         list.save()
         return
-    
+
     @staticmethod
     def delete_property_history(swagger_model_klass, uuid, key, retain_values=None):
+        '''
+        Calls _delete_property_history, but we need the db model first
+        @param swagger_model_klass: swagger model holding the property (e.g. a device)
+        @param uuid: uuid of the model (e.g. a device)
+        @param key: the key of the property
+        @param retain_values: number of values that are to be retained (i.e. delete everything but the latest n values)
+        @return: HTTP
+        '''
         db_model = BaseController.get_db_model(swagger_model_klass, 'uuid', uuid)
         for property in db_model.properties:
             if property.value.key == key:
-                BaseController._delete_property_history(property, retain_values=retain_values)
-        
-        db_model.save()
+                try:
+                    BaseController._delete_property_history(property, retain_values=retain_values)
+                    db_model.save()
+                except:
+                    return "Not ok", 500
+            else:
+                return "Property not found", 404
         return "OK", 200
-    
+
     @staticmethod
     def delete_model_history(swagger_model_klass, uuid, retain_values=None):
+        '''
+        Delete history of all properties of the model.
+        @param swagger_model_klass:  swagger model class of the model we're looking for (e.g. a device)
+        @param uuid: uuid of the model
+        @param retain_values: number of values that are to be retained (i.e. delete everything but the latest n values)
+        @return: HTTP
+        '''
+    
         db_model = BaseController.get_db_model(swagger_model_klass, 'uuid', uuid)
         for property in db_model.properties:
             BaseController._delete_property_history(property, retain_values=retain_values)
