@@ -2,7 +2,7 @@ import json
 import typing
 
 from bson import ObjectId
-from mongoengine.base import EmbeddedDocumentList
+from mongoengine.base import EmbeddedDocumentList, BaseDocument
 
 from swagger_server.controllers.routing import RoutingInformation
 from swagger_server.models.base_model_ import Model
@@ -10,6 +10,9 @@ from swagger_server.models.base_model_kms import KMSModelMixin
 
 
 class BaseModelSerializer(object):
+    '''
+    Base Serializer for Models.
+    '''
     
     def __init__(self, routing: RoutingInformation = None):
         '''
@@ -19,25 +22,17 @@ class BaseModelSerializer(object):
         super(BaseModelSerializer, self).__init__()
         self.routing = routing
     
-    @staticmethod
-    def get_nested_list_item(self, attribute_path=list, search_key="", search_value=None, db_object=None):
-        result = None
-        
-        for att in attribute_path:
-            result = getattr(db_object, att)
-        
-        for item in result:
-            if getattr(item, search_key) == search_value:
-                return item
+
     
     def deserialize(self, db_model, exclude=[], serializer_map: dict = {}) -> dict:
         '''
-        
-        @param serializer_map:
+        DB Model -> Swagger Model.
+        Recursively deserializes attributes of db_model using the stored swagger_model's attribute_map
         @param db_model: mongoengine db_model
-        @param exclude: a list of fields that are present in the swagger_types of the swagger models, that should be ignored by this function.
+        @param exclude: a list of fields that are present in the swagger_types of the swagger models, that should be ignored by the serializer.
+        @param serializer_map: a mapping of attributes -> serializer classes. If you want a specific serializer for an attribute, use this.
         
-        @return: dictionary that should be parsable by the swagger_model.from_dict() functions
+        @return: dictionary that is parsable by the swagger_model.from_dict() functions
         '''
         result = {}
         # some of the nested objects are not required. Don't try to deserialize those objects
@@ -107,6 +102,14 @@ class BaseModelSerializer(object):
         return True
     
     def update_attribute(self, db_model, swagger_model: Model, attribute_name, byte_value):
+        '''
+        update specific attribute of a model.
+        @param db_model: db model instance
+        @param swagger_model: swagger model instance
+        @param attribute_name: name of the attribute to update
+        @param byte_value: the value to put. will be typecasted to whatever the swagger model says it should be.
+        @return: boolean success or no
+        '''
         if attribute_name in swagger_model.swagger_types:
             value = byte_value.decode('utf-8')
             mongo_value = None
@@ -126,7 +129,7 @@ class BaseModelSerializer(object):
             return True
         return False
     
-    def serialize(self, model_klass, json: dict) -> Model:
+    def serialize(self, model_klass: type, json: dict) -> Model:
         '''
         
         @param model_klass: db_model class that should be used to serialize the data
@@ -136,7 +139,14 @@ class BaseModelSerializer(object):
         result = model_klass.from_dict(json)
         return result
     
-    def update_routing(self, _swagger_model: Model, db_model, deserialized: dict):
+    def update_routing(self, _swagger_model: Model, db_model: BaseDocument, deserialized: dict) -> None:
+        '''
+        Updates the routing information object with current path
+        @param _swagger_model: the model that should be appended to the path
+        @param db_model: the db model that should be appended to the path
+        @param deserialized: deserilized json. url + kafka topic will be set on this
+        @return: None
+        '''
         key = _swagger_model.url_key
         result = ""
         if key is None:
@@ -153,11 +163,6 @@ class BaseModelSerializer(object):
             self.routing.add(result)
             self.routing.urlize(deserialized)
             return
-    
-    def url_to_kafka(self, path):
-        result = path.replace("/", ".")
-        result = self.kafka_base + "." + result
-        return result
     
     def get_history(self, db_model, serializer_map={}):
         """

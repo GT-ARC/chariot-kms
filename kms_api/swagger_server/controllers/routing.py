@@ -30,19 +30,17 @@ class RoutingInformation():
                                routing_kafka='')
         return r
     
-    def add(self, crumb):
+    def add(self, crumb: str) -> None:
         '''
         add a crumb to the path to remember where the serializer has been
-        @param crumb: a single string.
-        @return:
+        @param crumb: a single string. Can contain multipart strings, e.g. /a/b/c
+        @return: None
         '''
-        if crumb is None or "." in crumb or "/" in crumb:
-            raise ValueError("Can't have . or / in url part")
     
         self.breadcrumbs_url.append(crumb)
         self.breadcrumbs_kafka.append(crumb)
-    
-    def up(self):
+
+    def up(self) -> None:
         '''
         go back up in crumbs
         @return:
@@ -51,10 +49,10 @@ class RoutingInformation():
             self.breadcrumbs_url.pop()
             self.breadcrumbs_kafka.pop()
         except:
-    
+        
             pass
-    
-    def urlize(self, d: dict):
+
+    def urlize(self, d: dict) -> None:
         '''
         Add this routinginformation object url and kafka to the dict.
         @param d: A dict to add the url and kafka topic to
@@ -62,22 +60,22 @@ class RoutingInformation():
         '''
         d['url'] = self._get_url()
         d['kafka_topic'] = self._get_kafka()
-    
-    def _get_url(self):
+
+    def _get_url(self) -> str:
         '''
         Builds the url from breadcrumbs
         @return: Full url
         '''
         return "".join(self.breadcrumbs_url)
-    
-    def _get_kafka(self):
+
+    def _get_kafka(self) -> str:
         '''
         Builds the kafka_topic from breadcrumbs
         @return: Full kafka_topic
         '''
         return "".join(self.breadcrumbs_kafka).replace("/", ".")
-    
-    def new_root(self, url, kafka):
+
+    def new_root(self, url: str, kafka: str) -> None:
         '''
         Rebase the root of routing to url and kafka_topic
         @param url: new url root
