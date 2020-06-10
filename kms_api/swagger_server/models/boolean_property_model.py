@@ -197,7 +197,6 @@ class BooleanPropertyModel(Model, KMSBooleanPropertyModel):
         """
         if value is None:
             raise ValueError("Invalid value for `value`, must not be `None`")  # noqa: E501
-        
         self._value = value
     
     @property
