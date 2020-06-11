@@ -33,4 +33,9 @@ jobs:
           environment: 018e98e3-a6e3-4f90-be98-3bb3a8515092
 
 
+      - name: Docker Log
+          run: |
+            docker logs chariot-kms_flask_1
+
+
 
