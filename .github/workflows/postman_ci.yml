@@ -1,0 +1,17 @@
+name: Newman Run
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: matt-ball/newman-action@master
+        with:
+          postmanApiKey: ${{ secrets.postmanApiKey }}
+          collection: kms_api/postman/postman_collection.json
+          environment: 018e98e3-a6e3-4f90-be98-3bb3a8515092
