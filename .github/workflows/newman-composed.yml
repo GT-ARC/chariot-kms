@@ -34,8 +34,8 @@ jobs:
 
 
       - name: Docker Log
-          run: |
-            docker logs chariot-kms_flask_1
+        run: |
+          docker logs chariot-kms_flask_1
 
 
 
