@@ -20,7 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the docker-compose stack
-        run: docker-compose up -d -f $GITHUB_WORKSPACE/docker-compose.yml
+        run: |
+          docker-compose -f $GITHUB_WORKSPACE/docker-compose.yml up -d
+          docker ps
 
       # Runs a set of commands using the runners shell
       - name: Postman Tests
