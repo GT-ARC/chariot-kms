@@ -102,8 +102,8 @@ services:
       - kms
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: kms
-      MONGO_INITDB_ROOT_PASSWORD: dPP88is,
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
       MONGODB_DATABASE: kms_global,
     volumes:
       - ./db:/data/db

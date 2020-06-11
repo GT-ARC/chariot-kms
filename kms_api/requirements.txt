@@ -2,13 +2,10 @@ connexion
 python_dateutil
 setuptools >= 21.0.0
 pymongo
-
 flask-mongoengine
 flask-debug
 connexion[swagger-ui]
 pydevd_pycharm
 kafka-python
--e ./
-flask_testing
 flask-cors
 gunicorn

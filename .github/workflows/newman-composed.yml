@@ -18,13 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Run setup script
-        run: |
-          chmod +x $GITHUB_WORKSPACE/clean.sh
-          $GITHUB_WORKSPACE/clean.sh
+      - name: Build the docker-compose stack
+        run: docker-compose up -d -f $GITHUB_WORKSPACE/docker-compose.yml
 
       # Runs a set of commands using the runners shell
       - name: Postman Tests
