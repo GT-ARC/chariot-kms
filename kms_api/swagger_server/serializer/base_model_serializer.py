@@ -163,7 +163,7 @@ class BaseModelSerializer(object):
             self.routing.add(result)
             self.routing.urlize(deserialized)
             return
-    
+
     def get_history(self, db_model, serializer_map={}):
         """
 
