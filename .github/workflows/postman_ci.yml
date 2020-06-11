@@ -13,5 +13,5 @@ jobs:
       - uses: matt-ball/newman-action@master
         with:
           postmanApiKey: ${{ secrets.postmanApiKey }}
-          collection: kms_api/postman/postman_collection.json
+          collection: 3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff
           environment: 018e98e3-a6e3-4f90-be98-3bb3a8515092
