@@ -133,3 +133,4 @@ dmypy.json
 /db/
 /flask_generated/swagger_server/swagger/generated_files/
 /.idea/
+/zk-single-kafka-multiple/
