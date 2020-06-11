@@ -35,6 +35,13 @@ jobs:
           collection: 3236604-3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff
           environment: 3236604-018e98e3-a6e3-4f90-be98-3bb3a8515092
 
+      - name: Manual postman tests
+        run: |
+          apt-get update
+          apt-get install npm
+          npm install -g newman
+
+          newman run "https://api.getpostman.com/collections/3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff?apikey=${{ secrets.postmanApiKey }}"  --environment "https://api.getpostman.com/environments/018e98e3-a6e3-4f90-be98-3bb3a8515092?apikey=${{ secrets.postmanApiKey }}"
 
       - name: Docker Log
         run: |
