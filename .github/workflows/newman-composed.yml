@@ -23,7 +23,7 @@ jobs:
         run: |
           docker-compose -f $GITHUB_WORKSPACE/docker-compose.yml up -d
           docker ps
-          bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080/v1)" != "200" ]]; do sleep 2; done'
+          sleep 20
 
 
       - name: Postman Tests
