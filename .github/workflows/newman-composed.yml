@@ -27,6 +27,7 @@ jobs:
           ./$GITHUB_WORKSPACE/clean.sh
 
       # Runs a set of commands using the runners shell
+      - name: Postman Tests
       - uses: matt-ball/newman-action@master
           with:
             postmanApiKey: ${{ secrets.postmanApiKey }}
