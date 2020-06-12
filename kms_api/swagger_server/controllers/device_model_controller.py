@@ -102,6 +102,8 @@ def get_device_history(device_uuid, length=None, clear=None):  # noqa: E501
     if not clear:
         # device = _get_device_model(device_uuid)
         device = BaseController.get_db_model(DeviceModel, 'uuid', device_uuid)
+        if device is None:
+            return "Not found", 404
         routing = RoutingInformation.create_root_routing_object()
         serializer = ModelSerializer(routing=routing)
         result = serializer.deserialize(device, exclude=['properties'])
@@ -154,7 +156,12 @@ def get_device_property_history(device_uuid, key, length=None, clear=False):  # 
 
     :rtype: DeviceModel
     """
-    property = _get_device_property(device_uuid, key=[key, ])
+    # property = _get_device_property(device_uuid, key=[key, ])
+    device = BaseController.get_db_model(DeviceModel, 'uuid', device_uuid)
+    if device is None:
+        return "Not found", 404
+    property = BaseController.get_list_item_of_db_model(device, 'properties', key, nested_path='value.key')
+
     if not clear:
         result = PropertyModelSerializer(routing=RoutingInformation.create_root_routing_object()).get_history(property,
                                                                                                               length=length)
@@ -162,6 +169,7 @@ def get_device_property_history(device_uuid, key, length=None, clear=False):  # 
             return result, 200
     else:
         return BaseController.delete_property_history(DeviceModel, device_uuid, key, retain_values=length)
+
     return "Error", 404
 
 

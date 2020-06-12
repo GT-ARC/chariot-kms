@@ -6,7 +6,7 @@ name: CI
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ master, ci_testing ]
   pull_request:
     branches: [ master ]
 
@@ -18,21 +18,34 @@ jobs:
     runs-on: ubuntu-latest
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Run setup script
+      - name: Build the docker-compose stack
         run: |
-          chmod +x $GITHUB_WORKSPACE/clean.sh
-          $GITHUB_WORKSPACE/clean.sh
+          cd $GITHUB_WORKSPACE
+          docker-compose  up -d
+          docker ps
+          echo sleeping for 20 seconds
+          sleep 20
 
-      # Runs a set of commands using the runners shell
+
       - name: Postman Tests
         uses: matt-ball/newman-action@master
         with:
           apiKey: ${{ secrets.postmanApiKey }}
-          collection: 3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff
-          environment: 018e98e3-a6e3-4f90-be98-3bb3a8515092
+          collection: 3236604-3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff
+          environment: 3236604-018e98e3-a6e3-4f90-be98-3bb3a8515092
+
+      - name: Manual postman tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install npm
+          sudo npm install -g newman
+
+          newman run "https://api.getpostman.com/collections/3a3f4468-72c9-4954-9b9b-eb8bcd9e7aff?apikey=${{ secrets.postmanApiKey }}"  --environment "https://api.getpostman.com/environments/018e98e3-a6e3-4f90-be98-3bb3a8515092?apikey=${{ secrets.postmanApiKey }}"
+
+      - name: Docker Log
+        run: |
+          docker logs chariot-kms_flask_1
 
 
 

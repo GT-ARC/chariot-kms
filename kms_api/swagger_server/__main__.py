@@ -83,19 +83,19 @@ class ModelLoader(object):
 def get_app(production=True):
     app = connexion.App(__name__, specification_dir='swagger/')
     app.app.json_encoder = encoder.JSONEncoder
-    
+
     app.app.config['MONGODB_DB'] = 'admin'
     app.app.config['MONGODB_HOST'] = 'mongo'
     app.app.config['MONGODB_PORT'] = 27017
-    app.app.config['MONGODB_USERNAME'] = 'kms'
-    app.app.config['MONGODB_PASSWORD'] = 'dPP88is,'
+    app.app.config['MONGODB_USERNAME'] = 'root'
+    app.app.config['MONGODB_PASSWORD'] = 'example'
     app.add_api('swagger.yaml', arguments={'title': 'kms'}, pythonic_params=True)
     MongoEngine(app.app)
     CORS(app.app)
     model_loader = ModelLoader()
     model_loader._import()
     log = logging.getLogger('werkzeug')
-    
+
     if not production:
         Debug(app.app)
         app.app.config['DEBUG'] = True

@@ -37,7 +37,7 @@ def get_human_operation(uuid, name):  # noqa: E501
     operation = BaseController.get_list_item_of_db_model(humanmodel, "operations", name, "name")
     if operation is not None:
         return BaseModelSerializer(routing=RoutingInformation.create_root_routing_object()).deserialize(operation), 200
-    return 'do some magic!'
+    return 'Not found', 404
 
 
 def get_human_operations(uuid):  # noqa: E501
