@@ -8,3 +8,4 @@ To restart: run.sh
 Delete all data + restart: clean.sh
  
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/d06961e7f49a8a8e0d7e/maintainability)](https://codeclimate.com/github/GT-ARC/chariot-kms/maintainability)
