@@ -1867,6 +1867,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DevicePropertyModel'
+          default: []
         type:
           pattern: ^array$
           type: string
@@ -1882,13 +1883,13 @@ components:
           type: array
           items:
             type: string
+          default: []
         type:
           pattern: ^array$
           type: string
 
-
     DevicePropertyModel:
-      oneOf:
+      anyOf:
         - $ref: '#/components/schemas/BooleanPropertyModel'
         - $ref: '#/components/schemas/NumberPropertyModel'
         - $ref: '#/components/schemas/StringPropertyModel'
@@ -1944,7 +1945,7 @@ components:
             type: string
 
     ServicePropertyModel:
-      oneOf:
+      anyOf:
         - $ref: '#/components/schemas/BooleanPropertyModel'
         - $ref: '#/components/schemas/NumberPropertyModel'
         - $ref: '#/components/schemas/StringPropertyModel'
@@ -1957,6 +1958,7 @@ components:
             type: string
         operation:
           type: string
+
 
 
     ServiceModel:
@@ -1985,7 +1987,7 @@ components:
 
 
     SkillPropertyModel:
-      oneOf:
+      anyOf:
         - $ref: '#/components/schemas/BooleanPropertyModel'
         - $ref: '#/components/schemas/NumberPropertyModel'
         - $ref: '#/components/schemas/StringPropertyModel'
@@ -2084,8 +2086,7 @@ components:
 
 
     HumanPropertyModel:
-
-      oneOf:
+      anyOf:
         - $ref: '#/components/schemas/BooleanPropertyModel'
         - $ref: '#/components/schemas/NumberPropertyModel'
         - $ref: '#/components/schemas/StringPropertyModel'
@@ -2323,7 +2324,7 @@ components:
           items:
             $ref: '#/components/schemas/ConstraintModel'
     TaskPropertyModel:
-      oneOf:
+      anyOf:
         - $ref: '#/components/schemas/BooleanPropertyModel'
         - $ref: '#/components/schemas/NumberPropertyModel'
         - $ref: '#/components/schemas/StringPropertyModel'
