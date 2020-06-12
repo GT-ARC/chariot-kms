@@ -4,6 +4,7 @@ setuptools >= 21.0.0
 pymongo
 flask-mongoengine
 flask-debug
+-e ./
 connexion[swagger-ui]
 pydevd_pycharm
 kafka-python

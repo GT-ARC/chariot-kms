@@ -203,16 +203,16 @@ class BaseController(object):
         @param swagger_model: db model (db_deviceModel, for example)
         @param identifier_field: the field that uniquely identifies the item to delete (_id, uuid)
         @param identifier_field_value: the value of the identifier field
-        @return: # of deleted items
+        @return:
         '''
-        
-        db_model = BaseController.get_db_model(swagger_model, identifier_field, identifier_field_value)
-        result = 0
-        if swagger_model is not None:
-            result = db_model.delete()
-        
-        return result, 200
     
+        db_model = BaseController.get_db_model(swagger_model, identifier_field, identifier_field_value)
+        if db_model is not None:
+            db_model.delete()
+            return "OK", 200
+        else:
+            return "Not found", 404
+
     @staticmethod
     def get_nested_list_item(db_model, list_name, list_item_identifier_field, list_item_identifier_value):
         '''

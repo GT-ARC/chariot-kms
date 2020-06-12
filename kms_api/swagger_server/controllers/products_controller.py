@@ -97,7 +97,7 @@ def get_product_history(uuid):  # noqa: E501
                                                                  {'productionFlow': ModelSerializer,
                                                                   'properties': PropertyModelSerializer})
     
-    return result
+    return result, 200
 
 
 def get_product_info(uuid):  # noqa: E501
@@ -210,6 +210,7 @@ def get_production_flow_item_property_history(uuid, name, key):  # noqa: E501
 
     :rtype: ProductionFlowItemProperty
     """
+    # TODO missing implementation
     return 'do some magic!'
 
 
